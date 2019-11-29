@@ -1,2 +1,0 @@
-# stegnography
-Final-Year-Project
