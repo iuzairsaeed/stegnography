@@ -15,15 +15,17 @@ class StegnographyController extends Controller
 
     public function index()
     {
-        dd(csrf_token());
-        return json_encode('dsa');
+        dd("csrf_token()");
+        // return json_encode('dsa');
     }
 
     public function LSBEncodeCrypt(Request $request)
     {
-        // dd('dsa');
-        $pictures = $request->get('pictures');
-        $original = preg_replace('/data:image\/\w+;base64,/', '', $pictures['original']);
+        // dd($request->all());
+        $pictures = $request->pictures;
+        // dd($pictures);
+        $original = preg_replace('/data:image\/\w+;base64,/', '', $pictures->getClientOriginalName());
+        // dd($original);
         $original = base64_decode($original);
         $imageOriginal = imagecreatefromstring($original);
         $x_dimension = imagesx($imageOriginal); //height

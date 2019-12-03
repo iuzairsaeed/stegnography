@@ -69,6 +69,6 @@ Route::post('/rand', ['as' => 'rand', 'uses' => 'randomController@rand']);
     });
 
 
-Route::get('/lsb_index','Api\StegnographyController@index');
-Route::post('/alsb_encode_crypt', ['as' => 'alsb_encode_crypt', 'uses' => 'Api\StegnographyController@LSBEncodeCrypt']);
-Route::post('/alsb_decode_crypt', ['as' => 'alsb_decode_crypt', 'uses' => 'Api\StegnographyController@LSBDecodeCrypt']);
+// Route::get('/api/index','Api\StegnographyController@index');
+// Route::any('/api/lsb_encode_crypt',  'Api\StegnographyController@LSBEncodeCrypt');
+// Route::any('/api/lsb_decode_crypt',  'Api\StegnographyController@LSBDecodeCrypt');

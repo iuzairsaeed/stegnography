@@ -13,7 +13,9 @@ class LSBCryptController extends Controller
 
     public function LSBEncodeCrypt(Request $request)
     {
+        // var_dump($request);
         $pictures = $request->get('pictures');
+        // dd($pictures);
         $original = preg_replace('/data:image\/\w+;base64,/', '', $pictures['original']);
         $original = base64_decode($original);
         $imageOriginal = imagecreatefromstring($original);

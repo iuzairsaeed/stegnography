@@ -84,8 +84,9 @@ var GalleryEncode = new Vue({
                         'offset': this.offset
                     })
                     .then(function(response) {
-                        // debugger;
+                        console.log(response);
                         if(response.body.data) {
+                           
                             this.copyPicture();
                             this.pictures.containers[0].base64Picture = response.body.data;
                         }
