@@ -19,9 +19,11 @@ class StegnographyController extends Controller
         // return json_encode('dsa');
     }
 
-    public function LSBEncodeCrypt(Request $request)
+    // public function LSBEncodeCrypt(Request $request)
+    public function LSBEncodeCrypt($picture,$text,$pass)
     {
-        // dd($request->all());
+        dd($picture);
+        // dd($request);
         $pictures = $request->pictures;
         // dd($pictures);
         $original = preg_replace('/data:image\/\w+;base64,/', '', $pictures->getClientOriginalName());
