@@ -19,6 +19,7 @@ class LSBCryptController extends Controller
         $original = preg_replace('/data:image\/\w+;base64,/', '', $pictures['original']);
         $original = base64_decode($original);
         $imageOriginal = imagecreatefromstring($original);
+        dd($imageOriginal);
         $x_dimension = imagesx($imageOriginal); //height
         $y_dimension = imagesy($imageOriginal); //width
 
