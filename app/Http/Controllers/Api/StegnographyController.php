@@ -15,7 +15,8 @@ class StegnographyController extends Controller
 
     public function index()
     {
-        dd("csrf_token()");
+        return response()->json(['data' => 'Agya hit']);
+        // dd("csrf_token()");
         // return json_encode('dsa');
     }
 

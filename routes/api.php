@@ -22,6 +22,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 // Route::post('/alsb_decode_crypt', ['as' => 'lsb_decode_crypt', 'uses' => 'Api/StegnographyController@LSBDecodeCrypt']);
 
 
-Route::get('/index','Api\StegnographyController@index');
+Route::any('/index','Api\StegnographyController@index');
 Route::any('/lsb_encode_crypt',  'Api\StegnographyController@LSBEncodeCrypt');
 Route::any('lsb_decode_crypt',  'Api\StegnographyController@LSBDecodeCrypt');
