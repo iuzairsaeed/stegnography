@@ -23,5 +23,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 
 Route::get('/index','Api\StegnographyController@index');
-Route::any('/lsb_encode_crypt',  'Api\StegnographyController@LSBEncodeCrypt');
-Route::any('lsb_decode_crypt',  'Api\StegnographyController@LSBDecodeCrypt');
+Route::post('/encrypt',  'Api\StegnographyController@LSBEncodeCrypt')->middleware('cors');
+Route::post('/decrypt',  'Api\StegnographyController@LSBDecodeCrypt')->middleware('cors');
