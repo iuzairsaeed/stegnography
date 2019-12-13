@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Validator;
 
 class StegnographyController extends Controller
 {
@@ -23,128 +24,153 @@ class StegnographyController extends Controller
     // public function LSBEncodeCrypt(Request $request)
     public function LSBEncodeCrypt(Request $request)
     {
-        // return response($request->offset);
-        // return response()->json(['image' => $request->encImage]);
-        // return response($request->offset);
-        // dd($request);
-        $pictures = $request->encImage;
-        // return response($pictures);
-        // dd($pictures);
-        $original = preg_replace('/data:image\/\w+;base64,/', '', $pictures);
-        $original = base64_decode($original);
-        $imageOriginal = imagecreatefromstring($original);
-        $x_dimension = imagesx($imageOriginal); //height
-        $y_dimension = imagesy($imageOriginal); //width
-        // dd($y_dimension);
-        
-        $key = $request->password;
-        $imageCrypto = $imageOriginal;
-        $string =  $request->msg;
-        // return response($imageCrypto);
-        $stringCount = strlen($string);
-        
-        $iv = "1234567812345678";
-        
-        $stringCrypto = openssl_encrypt($string, 'AES-256-CFB', $key, OPENSSL_RAW_DATA, $iv);
-        $bin = $this->textBinASCII2($stringCrypto); //string to array
-        
-        $stringLength = $this->textBinASCII2((string)strlen($bin));
-        //$unbinStringLength = (int)$this->stringBinToStringChars8($stringLength);
-        
-        //$cryptoString = $this->stringBinToStringChars8($bin);
-        //$output = openssl_decrypt($cryptoString, 'AES-256-CFB', $key, OPENSSL_RAW_DATA, $iv);
-        
-        $sign = $this->textBinASCII2('gravitation');
-        //$unbinSign = $this->stringBinToStringChars8($sign);
-        
-        $binaryText = str_split($stringLength.$sign.$bin);
-        $textCount = count($binaryText);
-        $count = 0;
-        
-        
-        for ($x = 0; $x < $x_dimension; $x++) {
-
-            if ($count >= $textCount)
-                break;
-
-            for ($y = 0; $y < $y_dimension; $y++) {
+        $validator = Validator::make($request->all(), [
+            'msg' => 'required',
+            'password' => 'required',
+            'encImage' => 'required'
+        ]);
+        if($validator->passes())
+        {      
+            $pictures = $request->encImage;
+            $pictures = str_replace('data:image/png;base64,', '', $pictures);
+            $pictures = str_replace(' ', '+', $pictures);
+            $imageName = str_random(10).'.'.'png';
+            \File::put(public_path(). '/' . $imageName, base64_decode($pictures));
+            // return response($pictures);
+            // dd($pictures);
+            $original = preg_replace('/data:image\/\w+;base64,/', '', $pictures);
+            $original = base64_decode($original);
+            $imageOriginal = imagecreatefromstring($original);
+            $x_dimension = imagesx($imageOriginal); //height
+            $y_dimension = imagesy($imageOriginal); //width
+            // dd($y_dimension);
+            
+            $key = $request->password;
+            $imageCrypto = $imageOriginal;
+            $string =  $request->msg;
+            // return response($imageCrypto);
+            $stringCount = strlen($string);
+            
+            $iv = "1234567812345678";
+            
+            $stringCrypto = openssl_encrypt($string, 'AES-256-CFB', $key, OPENSSL_RAW_DATA, $iv);
+            $bin = $this->textBinASCII2($stringCrypto); //string to array
+            
+            $stringLength = $this->textBinASCII2((string)strlen($bin));
+            //$unbinStringLength = (int)$this->stringBinToStringChars8($stringLength);
+            
+            //$cryptoString = $this->stringBinToStringChars8($bin);
+            //$output = openssl_decrypt($cryptoString, 'AES-256-CFB', $key, OPENSSL_RAW_DATA, $iv);
+            
+            $sign = $this->textBinASCII2('gravitation');
+            //$unbinSign = $this->stringBinToStringChars8($sign);
+            
+            $binaryText = str_split($stringLength.$sign.$bin);
+            $textCount = count($binaryText);
+            $count = 0;
+            
+            
+            for ($x = 0; $x < $x_dimension; $x++) {
 
                 if ($count >= $textCount)
                     break;
 
-                $rgbOriginal = imagecolorat($imageOriginal, $x, $y);
-                $r = ($rgbOriginal >> 16) & 0xFF;
-                $g = ($rgbOriginal >> 8) & 0xFF;
-                $b = $rgbOriginal & 0xFF;
-                
-                $blueBinaryArray = str_split((string)base_convert($b,10,2));
-                $blueBinaryArray[count($blueBinaryArray)-1] = $binaryText[$count];
-                $blueBinary = implode($blueBinaryArray);
-                
-                $color = imagecolorallocate($imageOriginal, $r, $g,
-                bindec($blueBinary));
-                imagesetpixel($imageCrypto, $x, $y, $color);
-                
-                $count++;
+                for ($y = 0; $y < $y_dimension; $y++) {
+
+                    if ($count >= $textCount)
+                        break;  
+
+                    $rgbOriginal = imagecolorat($imageOriginal, $x, $y);
+                    $r = ($rgbOriginal >> 16) & 0xFF;
+                    $g = ($rgbOriginal >> 8) & 0xFF;
+                    $b = $rgbOriginal & 0xFF;
+                    
+                    $blueBinaryArray = str_split((string)base_convert($b,10,2));
+                    $blueBinaryArray[count($blueBinaryArray)-1] = $binaryText[$count];
+                    $blueBinary = implode($blueBinaryArray);
+                    
+                    $color = imagecolorallocate($imageOriginal, $r, $g,
+                    bindec($blueBinary));
+                    imagesetpixel($imageCrypto, $x, $y, $color);
+                    
+                    $count++;
+                }
             }
+            //$imageSave = imagepng($imageCrypto,'C:\Users\User\Desktop\aes\aes-'.$stringCount.'.png');
+            ob_start();
+            imagepng($imageCrypto);
+            $image_string = base64_encode(ob_get_contents());
+            ob_end_clean();
+            // $base64 = $image_string;
+            $base64 = 'data:image/png;base64,' . $image_string;
+            imagedestroy($imageCrypto);
+            return response()->json(['encImage' => $base64]);
         }
-        //$imageSave = imagepng($imageCrypto,'C:\Users\User\Desktop\aes\aes-'.$stringCount.'.png');
-        ob_start();
-        imagepng($imageCrypto);
-        $image_string = base64_encode(ob_get_contents());
-        ob_end_clean();
-        $base64 = 'data:image/png;base64,' . $image_string;
-        imagedestroy($imageCrypto);
-        return response()->json(['data' => $base64]);
+        else
+        {
+            return response()->json($validator->messages(), 200);
+        }
         // dd($base64);
     }
 
     public function LSBDecodeCrypt(Request $request)
     {
-        $pictures = $request->data;
-        $original = preg_replace('/data:image\/\w+;base64,/', '', $pictures);
-        $original = base64_decode($original);
-        $imageOriginal = imagecreatefromstring($original);
-        
-        $x_dimension = imagesx($imageOriginal); //height
-        $y_dimension = imagesy($imageOriginal); //width
-        // dd($y_dimension);
+        $validator = Validator::make($request->all(), [
+            'data' => 'required',
+            'password' => 'required'
+        ]);
 
-        $binaryString = '';
+        if($validator->passes())
+        {       
+            $pictures = $request->data;
+            $original = preg_replace('/data:image\/\w+;base64,/', '', $pictures);
+            $original = base64_decode($original);
+            $imageOriginal = imagecreatefromstring($original);
+            
+            $x_dimension = imagesx($imageOriginal); //height
+            $y_dimension = imagesy($imageOriginal); //width
+            // dd($y_dimension);
 
-        for ($x = 0; $x < $x_dimension; $x++) {
+            $binaryString = '';
 
-            for ($y = 0; $y < $y_dimension; $y++) {
+            for ($x = 0; $x < $x_dimension; $x++) {
 
-                $rgbOriginal = imagecolorat($imageOriginal, $x, $y);
-                
-                $b = $rgbOriginal & 0xFF;
-                
-                $blueBinaryArray = str_split((string)base_convert($b, 10, 2));
-                $bit = $blueBinaryArray[count($blueBinaryArray) - 1];
-                $binaryString .= $bit;
+                for ($y = 0; $y < $y_dimension; $y++) {
+
+                    $rgbOriginal = imagecolorat($imageOriginal, $x, $y);
+                    
+                    $b = $rgbOriginal & 0xFF;
+                    
+                    $blueBinaryArray = str_split((string)base_convert($b, 10, 2));
+                    $bit = $blueBinaryArray[count($blueBinaryArray) - 1];
+                    $binaryString .= $bit;
+                }
             }
-        }
-        // dd($binaryString);
+            // dd($binaryString);
 
-        $iv = "1234567812345678";
-        $key = $request->password;
-        // dd($key);
-        
-        $sign = $this->textBinASCII2('gravitation');
-        $lengthSign = strlen($sign);
-        $position = strpos($binaryString, $sign);
-        $lengthBinData = mb_substr($binaryString, 0, $position);
-        $lengthData = $this->stringBinToStringChars8($lengthBinData);
-        $positionData = $position + $lengthSign;
-        // dd($lengthData);
-        $binaryData = mb_substr($binaryString, $positionData, $lengthData);
-        // dd($binaryData);
-        
-        $cryptoString = $this->stringBinToStringChars8($binaryData);
-        $output = openssl_decrypt($cryptoString, 'AES-256-CFB', $key, OPENSSL_RAW_DATA, $iv);
-        // dd($cryptoString);
-        return response()->json(['text' => $output]);
+            $iv = "1234567812345678";
+            $key = $request->password;
+            // dd($key);
+            
+            $sign = $this->textBinASCII2('gravitation');
+            $lengthSign = strlen($sign);
+            $position = strpos($binaryString, $sign);
+            $lengthBinData = mb_substr($binaryString, 0, $position);
+            $lengthData = $this->stringBinToStringChars8($lengthBinData);
+            $positionData = $position + $lengthSign;
+            // dd($lengthData);
+            $binaryData = mb_substr($binaryString, $positionData, $lengthData);
+            // dd($binaryData);
+            
+            $cryptoString = $this->stringBinToStringChars8($binaryData);
+            $output = openssl_decrypt($cryptoString, 'AES-256-CFB', $key, OPENSSL_RAW_DATA, $iv);
+            // dd($cryptoString);
+            return response()->json(['text' => $output]);
+        }
+        else
+        {
+            return response()->json($validator->messages(), 200);
+        }
     }
 
     public function stringBinToStringChars8($strBin)
