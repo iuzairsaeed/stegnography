@@ -26,9 +26,9 @@ class StegnographyController extends Controller
     public function ImageEncodeCrypt(Request $request)
     {        
         $validator = Validator::make($request->all(), [
-            'msg' => '',
-            'password' => '',
-            'encImage' => ''
+            'msg' => 'required',
+            'password' => 'required',
+            'encImage' => 'required'
         ]);
         if($validator->passes())
         {   
@@ -145,8 +145,10 @@ class StegnographyController extends Controller
         ]);
 
         if($validator->passes())
-        {       
-            $pictures = $request->data;
+        {   
+            $pictures = base64_encode(file_get_contents($request->file('data')));
+            // dd($pictures);    
+            // $pictures = $request->data;
             $original = preg_replace('/data:image\/\w+;base64,/', '', $pictures);
             $original = base64_decode($original);
             $imageOriginal = imagecreatefromstring($original);
