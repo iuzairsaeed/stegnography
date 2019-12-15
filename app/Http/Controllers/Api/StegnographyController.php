@@ -24,67 +24,7 @@ class StegnographyController extends Controller
 
     // public function LSBEncodeCrypt(Request $request)
     public function ImageEncodeCrypt(Request $request)
-    {
-
-        // return image which sent by android platform
-        // return response()->json(['data' => $request->encImage]);
-        // return response()->json(['data' => $request]);
-
-        // $ffmpeg = \FFMpeg\FFMpeg::create([
-        //     'ffmpeg.binaries'  => 'C:\ffmpeg\bin\ffmpeg.exe',
-        //     'ffprobe.binaries'  => 'C:\ffmpeg\bin\ffprobe.exe',
-        //     'timeout'          => 1, // The timeout for the underlying process
-        //     'ffmpeg.threads'   => 1,   // The number of threads that FFMpeg should use
-        // ]);
-        // $vidz = $request->file('video');
-        // $video = $ffmpeg->open($vidz);
-        // $video
-        //     ->filters()
-        //     ->resize(new FFMpeg\Coordinate\Dimension(320, 240))
-        //     ->synchronize();
-            
-        // // $video
-        // // ->save(new FFMpeg\Format\Video\X264(), 'C:\ffmpeg');
-        // $uniqueid = uniqid();        
-        // $video
-        //     ->frame(FFMpeg\Coordinate\TimeCode::fromSeconds(8))
-        //     ->save('imageADSA.jpeg');
-        // // $frame = $video->frame(FFMpeg\Coordinate\TimeCode::fromSeconds(1));
-        // // $frame->save('image.jpg');
-        // dd($video->save('frame.jpg'));
-        // dd('dsa');
-
-        
-        // $ffmpeg = "C:\\ffmpeg\\bin\\ffmpeg";
-        // $cmd = "$ffmpeg -i $vidz -an -ss 1 'saved.jpeg' ";
-        // dd(!shell_exec($cmd)); 
-        // if(! shell_exec($cmd)){
-        //     dd("CHAL GYA");
-        // } else {
-        //     dd("EEROR");
-        // }
-
-
-        // $path = $frame->save('public/uploads/files/', $frame);
-
-            // $video
-            //     ->save(new FFMpeg\Format\Video\X264(), 'export-x264.mp4')
-            //     ->save(new FFMpeg\Format\Video\WMV(), 'export-wmv.wmv')
-            //     ->save(new FFMpeg\Format\Video\WebM(), 'export-webm.webm');
-        // dd('dsa');
-        // dd($frame->save('image.jpg'));
-        // $ffmpeg = new \FFMpeg\FFMpeg();
-        // $ffmpeg = FFMpeg\FFMpeg::create();
-        // $ffmpeg = FFMpeg\FFMpeg::create(array(
-        //     'ffmpeg.binaries'  => '/opt/local/ffmpeg/bin/ffmpeg',
-        //     'ffprobe.binaries' => '/opt/local/ffmpeg/bin/ffprobe',
-        //     'timeout'          => 3600, // The timeout for the underlying process
-        //     'ffmpeg.threads'   => 12,   // The number of threads that FFMpeg should use
-        // ), null);
-        // dd($ffmpeg);
-        // dd($request);
-        // var_dump($request);
-        
+    {        
         $validator = Validator::make($request->all(), [
             'msg' => 'required',
             'password' => 'required',
@@ -95,7 +35,7 @@ class StegnographyController extends Controller
             $pictures = $request->encImage;
             $pictures = str_replace('data:image/png;base64,', '', $pictures);
             $pictures = str_replace(' ', '+', $pictures);
-            
+            // dd($pictures);
             // $imageName = str_random(10).'.'.'png';
             // $imagePath = public_path(). '/' . $imageName;
             // \File::put($imagePath , base64_decode($pictures));
@@ -167,10 +107,14 @@ class StegnographyController extends Controller
             // $base64 = $image_string;
             $base64 = 'data:image/png;base64,' . $image_string;
             imagedestroy($imageCrypto);
+
+            // dd($base64);
             
-            $imageName = str_random(10).'.'.'png';
-            $imagePath = public_path(). '/' . $base64;
-            \File::put($imagePath , base64_decode($pictures));
+            $imageName = uniqid().'.'.'png';
+            $imagePath = public_path().'/'. $imageName;
+            \File::put($imagePath , base64_decode($base64));
+
+            // dd($imagePath);
             
             return response()->json(['encImage' => $imagePath]);
         }
