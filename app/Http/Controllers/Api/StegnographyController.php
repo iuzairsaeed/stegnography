@@ -95,10 +95,11 @@ class StegnographyController extends Controller
             $pictures = $request->encImage;
             $pictures = str_replace('data:image/png;base64,', '', $pictures);
             $pictures = str_replace(' ', '+', $pictures);
-            $imageName = str_random(10).'.'.'png';
-            $imagePath = public_path(). '/' . $imageName;
-            \File::put($imagePath , base64_decode($pictures));
-            // return response($pictures);
+            
+            // $imageName = str_random(10).'.'.'png';
+            // $imagePath = public_path(). '/' . $imageName;
+            // \File::put($imagePath , base64_decode($pictures));
+            // // return response($pictures);
             // dd($pictures);
             $original = preg_replace('/data:image\/\w+;base64,/', '', $pictures);
             $original = base64_decode($original);
@@ -166,6 +167,11 @@ class StegnographyController extends Controller
             // $base64 = $image_string;
             $base64 = 'data:image/png;base64,' . $image_string;
             imagedestroy($imageCrypto);
+            
+            $imageName = str_random(10).'.'.'png';
+            $imagePath = public_path(). '/' . $base64;
+            \File::put($imagePath , base64_decode($pictures));
+            
             return response()->json(['encImage' => $imagePath]);
         }
         else
