@@ -45,7 +45,7 @@ class StegnographyController extends Controller
             // $imageName = str_random(10).'.'.'png';
             // $imagePath = public_path(). '/' . $imageName;
             // \File::put($imagePath , base64_decode($pictures));
-            // // return response($pictures);
+            // return response($pictures);
             // dd($pictures);
             $original = preg_replace('/data:image\/\w+;base64,/', '', $pictures);
             // $original = base64_encode($pictures);
@@ -115,14 +115,16 @@ class StegnographyController extends Controller
             $image_string = base64_encode(ob_get_contents());
             ob_end_clean();
             // $base64 = $image_string;
-            $base64 = 'data:image/png;base64,' . $image_string;
+            $base64 = $image_string;
             imagedestroy($imageCrypto);
 
+            // $base64 = base64_decode($base64);
+            $base64 = base64_decode($base64);
             // dd($base64);
             
             $imageName = str_random(10).uniqid().'.'.'png';
             $imagePath = public_path().'/'. $imageName;
-            \File::put($imagePath , base64_decode($base64));
+            \File::put($imagePath , $base64);
 
             // dd($imagePath);
             
