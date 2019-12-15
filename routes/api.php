@@ -22,12 +22,16 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 // Route::post('/alsb_decode_crypt', ['as' => 'lsb_decode_crypt', 'uses' => 'Api/StegnographyController@LSBDecodeCrypt']);
 
 
-<<<<<<< HEAD
-Route::any('/index','Api\StegnographyController@index');
-Route::any('/lsb_encode_crypt',  'Api\StegnographyController@LSBEncodeCrypt');
-Route::any('lsb_decode_crypt',  'Api\StegnographyController@LSBDecodeCrypt');
-=======
 Route::get('/index','Api\StegnographyController@index');
-Route::post('/encrypt',  'Api\StegnographyController@LSBEncodeCrypt')->middleware('cors');
-Route::post('/decrypt',  'Api\StegnographyController@LSBDecodeCrypt')->middleware('cors');
->>>>>>> 512f8df138082b2d2fd518523a2e8e317fd85caf
+
+//params = {encImage,msg,offset} , return {encImage:"base46IMAGE"}
+Route::any('/imgEncrypt',  'Api\StegnographyController@ImageEncodeCrypt');
+
+// params = {encImage} , return {text:"string"}
+Route::any('/imgDecrypt',  'Api\StegnographyController@ImageDecodeCrypt');
+
+// params = {encVideo,msg,offset} , return {encVideo:"Video.mp4"}
+Route::any('/vidEncrypt',  'Api\StegnographyController@VideoEncodeCrypt');
+
+// params = {encVideo} , return {text:"String"}
+Route::any('/vidDecrypt',  'Api\StegnographyController@VideoDecodeCrypt');
