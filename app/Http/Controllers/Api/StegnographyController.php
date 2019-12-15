@@ -26,13 +26,19 @@ class StegnographyController extends Controller
     public function ImageEncodeCrypt(Request $request)
     {        
         $validator = Validator::make($request->all(), [
-            'msg' => 'required',
-            'password' => 'required',
-            'encImage' => 'required'
+            'msg' => '',
+            'password' => '',
+            'encImage' => ''
         ]);
         if($validator->passes())
-        {      
+        {   
+            // dd($request->all());   
             $pictures = $request->encImage;
+            // $pictures = base64_encode($pictures);
+            $pictures = base64_encode(file_get_contents($request->file('encImage')));
+            // dd($image);
+
+            // dd($pictures);
             $pictures = str_replace('data:image/png;base64,', '', $pictures);
             $pictures = str_replace(' ', '+', $pictures);
             // dd($pictures);
@@ -42,9 +48,13 @@ class StegnographyController extends Controller
             // // return response($pictures);
             // dd($pictures);
             $original = preg_replace('/data:image\/\w+;base64,/', '', $pictures);
+            // $original = base64_encode($pictures);
             $original = base64_decode($original);
+            // dd($original);
             $imageOriginal = imagecreatefromstring($original);
+            // dd($imageOriginal);
             $x_dimension = imagesx($imageOriginal); //height
+            // dd($);
             $y_dimension = imagesy($imageOriginal); //width
             // dd($y_dimension);
             
@@ -110,7 +120,7 @@ class StegnographyController extends Controller
 
             // dd($base64);
             
-            $imageName = uniqid().'.'.'png';
+            $imageName = str_random(10).uniqid().'.'.'png';
             $imagePath = public_path().'/'. $imageName;
             \File::put($imagePath , base64_decode($base64));
 
