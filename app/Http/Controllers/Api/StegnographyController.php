@@ -332,13 +332,13 @@ class StegnographyController extends Controller
             $uniqueid = uniqid();
             $frameName = "extrEncImg".$uniqueid.".jpeg";
             $video
-            ->frame(FFMpeg\Coordinate\TimeCode::fromSeconds(7))
+            ->frame(FFMpeg\Coordinate\TimeCode::fromSeconds(4))
             ->save(public_path().'/uploads/'.$frameName );
             // dd(public_path().'/uploads/'.$frameName);
             
             $extractedFrame =File::get(public_path().'/uploads/'.$frameName);
             // $extractedFrame = base64_encode($extractedFrame);
-            dd($extractedFrame);
+            // dd($extractedFrame);
 
             // $pictures = base64_encode(file_get_contents($request->file('data')));
             // dd($pictures);    
@@ -631,7 +631,7 @@ class StegnographyController extends Controller
             // return ($imagePath);
 
             $fmpeg = "C:\\ffmpeg\\bin\\ffmpeg";
-            $filter = "[0:v][1:v] overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2:enable='between(t,5,9)'";
+            $filter = "[0:v][1:v] overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2:enable='between(t,0,10)'";
             $output = public_path().'/uploads/'.'encVideo'.$uniqueid.'.mp4';
             // $imagePath
             // dd($filter);
