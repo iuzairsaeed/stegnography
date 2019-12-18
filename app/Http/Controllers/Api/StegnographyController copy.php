@@ -8,7 +8,6 @@ use Validator;
 use FFMpeg;
 use File;
 use Storage;
-use App\Frame;
 
 
 class StegnographyController extends Controller
@@ -21,12 +20,9 @@ class StegnographyController extends Controller
 
     public function index()
     {
-        return response()->json(['data' => 'Agya hit']);
-        // dd("csrf_token()");
-        // return json_encode('dsa');
+        return response()->json(['data' => 'Api Hit Checking']);
     }
 
-    // public function LSBEncodeCrypt(Request $request)
     public function ImageEncodeCrypt(Request $request)
     {        
         $validator = Validator::make($request->all(), [
@@ -36,36 +32,21 @@ class StegnographyController extends Controller
         ]);
         if($validator->passes())
         {   
-            // dd($request->all());   
             $pictures = $request->encImage;
-            // $pictures = base64_encode($pictures);
             $pictures = base64_encode(file_get_contents($request->file('encImage')));
-            // dd($image);
-
-            // dd($pictures);
             $pictures = str_replace('data:image/png;base64,', '', $pictures);
             $pictures = str_replace(' ', '+', $pictures);
-            // dd($pictures);
-            // $imageName = str_random(10).'.'.'png';
-            // $imagePath = public_path(). '/' . $imageName;
-            // \File::put($imagePath , base64_decode($pictures));
-            // return response($pictures);
-            // dd($pictures);
+            
             $original = preg_replace('/data:image\/\w+;base64,/', '', $pictures);
             $original = base64_decode($original);
             $imageOriginal = imagecreatefromstring($original);
             $x_dimension = imagesx($imageOriginal); //height
             $y_dimension = imagesy($imageOriginal); //width
-            // $original = base64_encode($pictures);
-            // dd($original);
-            // dd($imageOriginal);
-            // dd($);
-            // dd($y_dimension);
             
             $key = $request->password;
             $imageCrypto = $imageOriginal;
             $string =  $request->msg;
-            // return response($imageCrypto);
+            
             $stringCount = strlen($string);
             
             $iv = "1234567812345678";
@@ -74,13 +55,8 @@ class StegnographyController extends Controller
             $bin = $this->textBinASCII2($stringCrypto); //string to array
             
             $stringLength = $this->textBinASCII2((string)strlen($bin));
-            //$unbinStringLength = (int)$this->stringBinToStringChars8($stringLength);
-            
-            //$cryptoString = $this->stringBinToStringChars8($bin);
-            //$output = openssl_decrypt($cryptoString, 'AES-256-CFB', $key, OPENSSL_RAW_DATA, $iv);
             
             $sign = $this->textBinASCII2('uzairsaeed');
-            //$unbinSign = $this->stringBinToStringChars8($sign);
             
             $binaryText = str_split($stringLength.$sign.$bin);
             $textCount = count($binaryText);
@@ -113,18 +89,15 @@ class StegnographyController extends Controller
                     $count++;
                 }
             }
-            //$imageSave = imagepng($imageCrypto,'C:\Users\User\Desktop\aes\aes-'.$stringCount.'.png');
+           
             ob_start();
             imagepng($imageCrypto);
             $image_string = base64_encode(ob_get_contents());
             ob_end_clean();
-            // $base64 = $image_string;
             $base64 = $image_string;
             imagedestroy($imageCrypto);
 
-            // $base64 = base64_decode($base64);
             $base64 = base64_decode($base64);
-            // dd($base64);
             
             $imageName = str_random(10).uniqid().'.'.'png';
             $imagePath = public_path().'/'. $imageName;
@@ -151,16 +124,11 @@ class StegnographyController extends Controller
         if($validator->passes())
         {   
             $pictures = base64_encode(file_get_contents($request->file('data')));
-            // dd($pictures);    
-            // $pictures = $request->data;
             $original = preg_replace('/data:image\/\w+;base64,/', '', $pictures);
             $original = base64_decode($original);
             $imageOriginal = imagecreatefromstring($original);
-            
-            // dd($imageOriginal);
             $x_dimension = imagesx($imageOriginal); //height
             $y_dimension = imagesy($imageOriginal); //width
-            // dd($y_dimension);
 
             $binaryString = '';
 
@@ -176,26 +144,24 @@ class StegnographyController extends Controller
                     $bit = $blueBinaryArray[count($blueBinaryArray) - 1];
                     $binaryString .= $bit;
                 }
-                // return($blueBinaryArray);
             }
             
             $iv = "1234567812345678";
             $key = $request->password;
-            // dd($key);
-            
+                        
             $sign = $this->textBinASCII2('uzairsaeed');
             $lengthSign = strlen($sign);
             $position = strpos($binaryString, $sign);
+            
             $lengthBinData = mb_substr($binaryString, 0, $position);
             $lengthData = $this->stringBinToStringChars8($lengthBinData);
             $positionData = $position + $lengthSign;
-            // dd($lengthData);
+            
             $binaryData = mb_substr($binaryString, $positionData, $lengthData);
-            // dd($binaryData);
             
             $cryptoString = $this->stringBinToStringChars8($binaryData);
             $output = openssl_decrypt($cryptoString, 'AES-256-CFB', $key, OPENSSL_RAW_DATA, $iv);
-            // dd($cryptoString);
+
             return response()->json(['text' => $output]);
         }
         else
@@ -206,7 +172,6 @@ class StegnographyController extends Controller
 
     public function stringBinToStringChars8($strBin)
     {
-        // dd('fun '. $strBin);
         $arrayChars = str_split($strBin, 8);
         $result = '';
         for ($i = 0; $i<count($arrayChars); $i++)
@@ -218,7 +183,6 @@ class StegnographyController extends Controller
     
     function textBinASCII2($text)
     {
-        // dd('fun1 '. $text);
         $bin = array();
         $max = 0;
         for($i=0; strlen($text)>$i; $i++) {
@@ -242,7 +206,6 @@ class StegnographyController extends Controller
     
     function ASCIIBinText2($bin)
     {
-        // dd('fun2 '. $bin);
         $text = array();
         $bin = explode(" ", $bin);
         for($i=0; count($bin)>$i; $i++)
@@ -329,35 +292,20 @@ class StegnographyController extends Controller
                 'ffmpeg.threads'   => 16,   // The number of threads that FFMpeg should use
             ]);
             $vidz = $request->encVideo;
-            $vidzPath = public_path().'/uploads/'.$vidz->getClientOriginalName();
-
-            $data = Frame::all()->where('video' , $vidzPath)->first();
-            $frame=File::get($data['frame']);
             $video = $ffmpeg->open($vidz);
-            
             $uniqueid = uniqid();
-            $frameName = "extrEncImg".$uniqueid.".png";
+            $frameName = "extrEncImg".$uniqueid.".jpeg";
             $video
-            ->frame(FFMpeg\Coordinate\TimeCode::fromSeconds(0.0))
+            ->frame(FFMpeg\Coordinate\TimeCode::fromSeconds(4))
             ->save(public_path().'/uploads/'.$frameName );
-            // dd(public_path().'/uploads/'.$frameName);
             
-            // dd($frameName);
             $extractedFrame =File::get(public_path().'/uploads/'.$frameName);
-            // $extractedFrame = base64_encode($extractedFrame);
-            // dd($extractedFrame);
 
-            // $pictures = base64_encode(file_get_contents($request->file('data')));
-            // dd($pictures);    
-            $pictures = $frame;
-            // $original = preg_replace('/data:image\/\w+;base64,/', '', $pictures);
-            // $original = base64_decode($original);
+            $pictures = $extractedFrame;
             $imageOriginal = imagecreatefromstring($pictures);
             
-            // dd($imageOriginal);
             $x_dimension = imagesx($imageOriginal); //height
             $y_dimension = imagesy($imageOriginal); //width
-            // dd($y_dimension);
 
             $binaryString = '';
 
@@ -384,16 +332,12 @@ class StegnographyController extends Controller
             $lengthSign = strlen($sign);
             $position = strpos($binaryString, $sign);
             $lengthBinData = mb_substr($binaryString, 0, $position);
-            // dd($position);
             $lengthData = $this->stringBinToStringChars8($lengthBinData);
             $positionData = $position + $lengthSign;
-            // dd($lengthData);
             $binaryData = mb_substr($binaryString, $positionData, $lengthData);
-            // dd($binaryData);
-            
+        
             $cryptoString = $this->stringBinToStringChars8($binaryData);
             $output = openssl_decrypt($cryptoString, 'AES-256-CFB', $key, OPENSSL_RAW_DATA, $iv);
-            // dd($cryptoString);
             return response()->json(['text' => $output]);
 
         }
@@ -405,79 +349,6 @@ class StegnographyController extends Controller
     }
     public function VideoEncodeCrypt(Request $request)
     {
-        // $o=File::get('encVid5df65130515e1.jpeg');
-        // dd($o);
-        // dd('sss');
-        // dd($request->encVideo);
-        // return response()->json(['encVideo' => $request->encVideo]);
-        // dd($request);   
-        // $ffmpeg = \FFMpeg\FFMpeg::create([
-        //     'ffmpeg.binaries'  => 'C:\ffmpeg\bin\ffmpeg.exe',
-        //     'ffprobe.binaries'  => 'C:\ffmpeg\bin\ffprobe.exe',
-        //     'timeout'          => 1, // The timeout for the underlying process
-        //     'ffmpeg.threads'   => 1,   // The number of threads that FFMpeg should use
-        // ]);
-        // $vidz = $request->encVideo;
-        // $video = $ffmpeg->open($vidz);
-
-        // dd($ffmpeg);
-        // dd($video);
-        // $video
-        //     ->filters()
-        //     ->resize(new FFMpeg\Coordinate\Dimension(320, 240))
-        //     ->synchronize();
-            
-        // $video
-        // ->save(new FFMpeg\Format\Video\X264(), 'C:\ffmpeg');
-        
-        // $uniqueid = uniqid();
-        // $videoName = 'encVid'.$uniqueid.'.jpeg';
-        // $video
-        //     ->frame(FFMpeg\Coordinate\TimeCode::fromSeconds(5))
-        //     ->save($videoName);
-
-        // $videoPath = public_path().'/'. $videoName;
-        
-        // $extractedFrame =File::get($videoName);
-        // $extractedFrame = base64_encode($a);
-
-
-        // File $file = new FIle;
-        // \File
-
-        // dd($extractedFrame);
-        
-        // return $videoPath;
-        // dd($videoPath);
-
-        // // $frame = $video->frame(FFMpeg\Coordinate\TimeCode::fromSeconds(1));
-        // // $frame->save('image.jpg');
-        // dd($video->save('frame.jpg'));
-        // dd($videoName);
-
-        
-        // $ffmpeg = "C:\\ffmpeg\\bin\\ffmpeg";
-        // $cmd = "$ffmpeg -i $vidz -an -ss 1 'saved.jpeg' ";
-        // dd(!shell_exec($cmd)); 
-        // if(! shell_exec($cmd)){
-        //     dd("CHAL GYA");
-        // } else {
-        //     dd("EEROR");
-        // }
-
-
-        // $path = $frame->save('public/uploads/files/', $frame);
-
-            // $video
-            //     ->save(new FFMpeg\Format\Video\X264(), 'export-x264.mp4')
-            //     ->save(new FFMpeg\Format\Video\WMV(), 'export-wmv.wmv')
-            //     ->save(new FFMpeg\Format\Video\WebM(), 'export-webm.webm');
-        // dd('dsa');
-
-        // dd($ffmpeg);
-        // dd($request);
-        // var_dump($request);
-        
         $validator = Validator::make($request->all(), [
             'msg' => 'required',
             'password' => 'required',
@@ -496,36 +367,10 @@ class StegnographyController extends Controller
             $extension = $vidz->extension();
             $uniqueid = uniqid();
             
-            // $uniqueid = uniqid();
-            
-            $frameName = "extrImg".$uniqueid.".png";
+            $frameName = "extrImg".$uniqueid.".jpeg";
             $video
-            ->frame(FFMpeg\Coordinate\TimeCode::fromSeconds(0.0))
+            ->frame(FFMpeg\Coordinate\TimeCode::fromSeconds(5))
             ->save(public_path().'/uploads/'.$frameName );
-            // dd('ds');
-
-            
-            // $a=File::get($videoFilename);
-            // dd($a);
-            
-            // $vidz = $request;
-            
-            // $videoUploadedName = 'vidUpl'.str_random(10).uniqid().'.'.$extension;
-            // $videoUploadedPath = public_path().'/uploads/';
-            // \File::move($videoUploadedPath ,  $videoUploadedName);
-            // dd($vidz);
-            
-            // $vidz = $request->encVideo;
-            
-            
-            // $video = $ffmpeg->open($vidz);
-            // dd('ds');
-            // dd($video);
-            
-            // $videoUploadedName = 'encVid'.$uniqueid.'.jpeg';
-            // dd($video);
-            // dd('dsa');
-
 
             $file = $request->file('encVideo');
             $videoFilename = 'vidUpl'. $uniqueid . $file->getClientOriginalName();
@@ -539,14 +384,9 @@ class StegnographyController extends Controller
             $pictures = $extractedFrame;
             $pictures = str_replace('data:image/png;base64,', '', $pictures);
             $pictures = str_replace(' ', '+', $pictures);
-            // $imageName = str_random(10).'.'.'png';
-            // \File::put(public_path(). '/' . $imageName, base64_decode($pictures));
-            // return response($pictures);
             $original = preg_replace('/data:image\/\w+;base64,/', '', $extractedFrame);
             $original = base64_decode($original);
             $imageOriginal = imagecreatefromstring($original);
-            // dd($imageOriginal);
-            // dd($original);
             $x_dimension = imagesx($imageOriginal); //height
             $y_dimension = imagesy($imageOriginal); //width
             
@@ -554,8 +394,6 @@ class StegnographyController extends Controller
             $imageCrypto = $imageOriginal;
             $string =  $request->msg;
             $stringCount = strlen($string);
-            // return response($imageCrypto);
-            // dd($key);
             
             $iv = "1234567812345678";
             
@@ -563,13 +401,8 @@ class StegnographyController extends Controller
             $bin = $this->textBinASCII2($stringCrypto); //string to array
             
             $stringLength = $this->textBinASCII2((string)strlen($bin));
-            //$unbinStringLength = (int)$this->stringBinToStringChars8($stringLength);
-            
-            //$cryptoString = $this->stringBinToStringChars8($bin);
-            //$output = openssl_decrypt($cryptoString, 'AES-256-CFB', $key, OPENSSL_RAW_DATA, $iv);
             
             $sign = $this->textBinASCII2('uzairsaeed');
-            //$unbinSign = $this->stringBinToStringChars8($sign);
             
             $binaryText = str_split($stringLength.$sign.$bin);
             $textCount = count($binaryText);
@@ -602,15 +435,10 @@ class StegnographyController extends Controller
                     $count++;
                 }
             }
-            // $imageSave = imagepng($imageCrypto,"C:\\ffmpeg\\".$stringCount.".png");
-            // $encVidImage = str_replace('data:image/png;base64,', '', $base64);
-            // $encVidImage = str_replace(' ', '+', $base64);
-            $EcryptedVideoImageName = 'encVidImage'.uniqid().'.png'; 
+
+            $EcryptedVideoImageName = 'encVidImage'.uniqid().'.jpg'; 
             $imageSave = imagepng($imageCrypto,public_path().'/uploads/'.$EcryptedVideoImageName);
             $imagePath = public_path().'/uploads/'.$EcryptedVideoImageName;
-
-
-
             
             ob_start();
             imagepng($imageCrypto);
@@ -619,55 +447,19 @@ class StegnographyController extends Controller
             $base64 = $image_string;
             $base64 = 'data:image/png;base64,' . $image_string;
             imagedestroy($imageCrypto);
-            
-            // \File::put(public_path().'/uploads/'.$EcryptedVideoImageName , base64_decode($base64) );
-            // dd($EcryptedVideoImageName);
-            // $encVidImgPath = public_path().'/uploads/encrypted/';
-            // $file->move($encVidImgPath, $EcryptedVideoImageName);
-            // $videoImagePathName = $encVidImgPath. $EcryptedVideoImageName;
-            
-            // $extractedFrame =File::get($videoPath.$frameName);
-            // $extractedFrame = base64_encode($extractedFrame);
-
-
-
-            // $base64 = base64_decode($base64);
-            // $imageName = 'encVid'.uniqid().'.jpg';
-            // $imagePath = public_path().'/uploads/'. $imageName;
-            
-            // dd($base64);
-            // $extractedEncryptedImage = File::get(public_path().'/uploads/'.$EcryptedVideoImageName);
-            // $extractedEncryptedImage = base64_encode($extractedEncryptedImage);
-            // return($videoPathName);
-            // return ($imagePath);
 
             $fmpeg = "C:\\ffmpeg\\bin\\ffmpeg";
-            $filter = "[0:v][1:v] overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2:enable='between(t,0,0.0)'";
+            $filter = "[0:v][1:v] overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2:enable='between(t,5,1)'";
             $output = public_path().'/uploads/'.'encVideo'.$uniqueid.'.mp4';
-
-            // $a=Frame::all();
-            // dd($a);
-            Frame::create(['video'=>$output ,'frame'=>$imagePath ]);
-            // $data = new Frame;
-            // $data->video = $output;
-            // $data->frame = $imagePath;
-            // $data-save();
-            // $imagePath
-            // dd($filter);     
             // $cmd = "$fmpeg -i $vidz -an -ss 1 AAAA.jpg ";
             $cmd = $fmpeg.' -i '.$videoPathName.' -i '.$imagePath.'  -filter_complex "'.$filter.'" -pix_fmt yuv420p -c:a copy '.$output;
-            // return($cmd); 
-            // dd(!shell_exec($cmd)); 
+             
             if(! shell_exec($cmd)){
                 return response()->json(['encVideo' => $output]);    
             } else {
-                return response()->json($validator->messages(), 200);
+                return response()->json($validator->messages("FFmpeg didn't run this command"), 200);
             }
                         
-            // $imageName = str_random(10).uniqid().'.'.'png';
-            // $imagePath = public_path().'/'. $imageName;
-            // \File::put($imagePath , $base64);
-
             return response()->json(['encImage' => $base64]);
 
         }
