@@ -14,128 +14,116 @@ class LSBCryptController extends Controller
 
     public function LSBEncodeCrypt(Request $request)
     {
-        $ffmpeg = \FFMpeg\FFMpeg::create([
-            'ffmpeg.binaries'  => 'C:\ffmpeg\bin\ffmpeg.exe',
-            'ffprobe.binaries'  => 'C:\ffmpeg\bin\ffprobe.exe',
-            'timeout'          => 1, // The timeout for the underlying process
-            'ffmpeg.threads'   => 1,   // The number of threads that FFMpeg should use
+        return $request->all();
+        $validator = Validator::make($request->all(), [
+            'msg' => 'required',
+            'password' => 'required',
+            'encImage' => 'required'
         ]);
-        $vidz = $request->file('video');
-        $video = $ffmpeg->open($vidz);
-        $video
-            ->filters()
-            ->resize(new FFMpeg\Coordinate\Dimension(320, 240))
-            ->synchronize();
+        if($validator->passes())
+        {   
+            // dd($request->all());   
+            $pictures = $request->encImage;
+            // $pictures = base64_encode($pictures);
+            $pictures = base64_encode(file_get_contents($request->file('encImage')));
+            // dd($image);
+
+            // dd($pictures);
+            $pictures = str_replace('data:image/png;base64,', '', $pictures);
+            $pictures = str_replace(' ', '+', $pictures);
+            // dd($pictures);
+            // $imageName = str_random(10).'.'.'png';
+            // $imagePath = public_path(). '/' . $imageName;
+            // \File::put($imagePath , base64_decode($pictures));
+            // return response($pictures);
+            // dd($pictures);
+            $original = preg_replace('/data:image\/\w+;base64,/', '', $pictures);
+            $original = base64_decode($original);
+            $imageOriginal = imagecreatefromstring($original);
+            $x_dimension = imagesx($imageOriginal); //height
+            $y_dimension = imagesy($imageOriginal); //width
+            // $original = base64_encode($pictures);
+            // dd($original);
+            // dd($imageOriginal);
+            // dd($);
+            // dd($y_dimension);
             
-        // $video
-        // ->save(new FFMpeg\Format\Video\X264(), 'C:\ffmpeg');
-        $uniqueid = uniqid();
-        
-        $video
-            ->frame(FFMpeg\Coordinate\TimeCode::fromSeconds(5))
-            ->save('hello.jpeg');
-        // // $frame = $video->frame(FFMpeg\Coordinate\TimeCode::fromSeconds(1));
-        // // $frame->save('image.jpg');
-        // dd($video->save('frame.jpg'));
-        // dd('dsa');
-
-        
-        // $ffmpeg = "C:\\ffmpeg\\bin\\ffmpeg";
-        // $cmd = "$ffmpeg -i $vidz -an -ss 1 'saved.jpeg' ";
-        // dd(!shell_exec($cmd)); 
-        // if(! shell_exec($cmd)){
-        //     dd("CHAL GYA");
-        // } else {
-        //     dd("EEROR");
-        // }
-
-
-        // $path = $frame->save('public/uploads/files/', $frame);
-
-            // $video
-            //     ->save(new FFMpeg\Format\Video\X264(), 'export-x264.mp4')
-            //     ->save(new FFMpeg\Format\Video\WMV(), 'export-wmv.wmv')
-            //     ->save(new FFMpeg\Format\Video\WebM(), 'export-webm.webm');
-        dd('dsa');
-        // dd($frame->save('image.jpg'));
-        // $ffmpeg = new \FFMpeg\FFMpeg();
-        // $ffmpeg = FFMpeg\FFMpeg::create();
-        // $ffmpeg = FFMpeg\FFMpeg::create(array(
-        //     'ffmpeg.binaries'  => '/opt/local/ffmpeg/bin/ffmpeg',
-        //     'ffprobe.binaries' => '/opt/local/ffmpeg/bin/ffprobe',
-        //     'timeout'          => 3600, // The timeout for the underlying process
-        //     'ffmpeg.threads'   => 12,   // The number of threads that FFMpeg should use
-        // ), null);
-        dd($ffmpeg);
-        dd($request);
-        // var_dump($request);
-        $pictures = $request->get('pictures');
-        // dd($pictures);
-        $original = preg_replace('/data:image\/\w+;base64,/', '', $pictures['original']);
-        $original = base64_decode($original);
-        $imageOriginal = imagecreatefromstring($original);
-        dd($imageOriginal);
-        $x_dimension = imagesx($imageOriginal); //height
-        $y_dimension = imagesy($imageOriginal); //width
-
-        $key = $request->get('password');
-        $imageCrypto = $imageOriginal;
-        $string =  $request->get('text');
-        $stringCount = strlen($string);
-
-        $iv = "1234567812345678";
-
-        $stringCrypto = openssl_encrypt($string, 'AES-256-CFB', $key, OPENSSL_RAW_DATA, $iv);
-        $bin = $this->textBinASCII2($stringCrypto); //string to array
-
-        $stringLength = $this->textBinASCII2((string)strlen($bin));
-        //$unbinStringLength = (int)$this->stringBinToStringChars8($stringLength);
-
-        //$cryptoString = $this->stringBinToStringChars8($bin);
-        //$output = openssl_decrypt($cryptoString, 'AES-256-CFB', $key, OPENSSL_RAW_DATA, $iv);
-
-        $sign = $this->textBinASCII2('gravitation');
-        //$unbinSign = $this->stringBinToStringChars8($sign);
-
-        $binaryText = str_split($stringLength.$sign.$bin);
-        $textCount = count($binaryText);
-        $count = 0;
-
-        for ($x = 0; $x < $x_dimension; $x++) {
-
-            if ($count >= $textCount)
-                break;
-
-            for ($y = 0; $y < $y_dimension; $y++) {
+            $key = $request->password;
+            $imageCrypto = $imageOriginal;
+            $string =  $request->msg;
+            // return response($imageCrypto);
+            $stringCount = strlen($string);
+            
+            $iv = "1234567812345678";
+            
+            $stringCrypto = openssl_encrypt($string, 'AES-256-CFB', $key, OPENSSL_RAW_DATA, $iv);
+            $bin = $this->textBinASCII2($stringCrypto); //string to array
+            
+            $stringLength = $this->textBinASCII2((string)strlen($bin));
+            //$unbinStringLength = (int)$this->stringBinToStringChars8($stringLength);
+            
+            //$cryptoString = $this->stringBinToStringChars8($bin);
+            //$output = openssl_decrypt($cryptoString, 'AES-256-CFB', $key, OPENSSL_RAW_DATA, $iv);
+            
+            $sign = $this->textBinASCII2('uzairsaeed');
+            //$unbinSign = $this->stringBinToStringChars8($sign);
+            
+            $binaryText = str_split($stringLength.$sign.$bin);
+            $textCount = count($binaryText);
+            $count = 0;
+            
+            
+            for ($x = 0; $x < $x_dimension; $x++) {
 
                 if ($count >= $textCount)
                     break;
 
-                $rgbOriginal = imagecolorat($imageOriginal, $x, $y);
+                for ($y = 0; $y < $y_dimension; $y++) {
 
-                $r = ($rgbOriginal >> 16) & 0xFF;
-                $g = ($rgbOriginal >> 8) & 0xFF;
-                $b = $rgbOriginal & 0xFF;
+                    if ($count >= $textCount)
+                        break;  
 
-                $blueBinaryArray = str_split((string)base_convert($b,10,2));
-                $blueBinaryArray[count($blueBinaryArray)-1] = $binaryText[$count];
-                $blueBinary = implode($blueBinaryArray);
-
-                $color = imagecolorallocate($imageOriginal, $r, $g,
+                    $rgbOriginal = imagecolorat($imageOriginal, $x, $y);
+                    $r = ($rgbOriginal >> 16) & 0xFF;
+                    $g = ($rgbOriginal >> 8) & 0xFF;
+                    $b = $rgbOriginal & 0xFF;
+                    
+                    $blueBinaryArray = str_split((string)base_convert($b,10,2));
+                    $blueBinaryArray[count($blueBinaryArray)-1] = $binaryText[$count];
+                    $blueBinary = implode($blueBinaryArray);
+                    
+                    $color = imagecolorallocate($imageOriginal, $r, $g,
                     bindec($blueBinary));
-                imagesetpixel($imageCrypto, $x, $y, $color);
-
-                $count++;
+                    imagesetpixel($imageCrypto, $x, $y, $color);
+                    
+                    $count++;
+                }
             }
+            //$imageSave = imagepng($imageCrypto,'C:\Users\User\Desktop\aes\aes-'.$stringCount.'.png');
+            ob_start();
+            imagepng($imageCrypto);
+            $image_string = base64_encode(ob_get_contents());
+            ob_end_clean();
+            // $base64 = $image_string;
+            $base64 = $image_string;
+            imagedestroy($imageCrypto);
+
+            // $base64 = base64_decode($base64);
+            $base64 = base64_decode($base64);
+            // dd($base64);
+            
+            $imageName = str_random(10).uniqid().'.'.'png';
+            $imagePath = public_path().'/'. $imageName;
+            \File::put($imagePath , $base64);
+
+            // dd($imagePath);
+            
+            return response()->json(['encImage' => $imagePath]);
         }
-        //$imageSave = imagepng($imageCrypto,'C:\Users\User\Desktop\aes\aes-'.$stringCount.'.png');
-        ob_start();
-        imagepng($imageCrypto);
-        $image_string = base64_encode(ob_get_contents());
-        ob_end_clean();
-        $base64 = 'data:image/png;base64,' . $image_string;
-        imagedestroy($imageCrypto);
-        return response()->json(['data' => $base64]);
+        else
+        {
+            return response()->json($validator->messages(), 200);
+        }
     }
 
     public function LSBDecodeCrypt(Request $request)

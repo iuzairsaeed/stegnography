@@ -28,7 +28,8 @@ class StegnographyController extends Controller
 
     // public function LSBEncodeCrypt(Request $request)
     public function ImageEncodeCrypt(Request $request)
-    {        
+    {    
+        // dd($request);    
         $validator = Validator::make($request->all(), [
             'msg' => 'required',
             'password' => 'required',
